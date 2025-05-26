@@ -3,23 +3,11 @@ import React from "react";
 import Toast from "../Toast";
 import styles from "./ToastShelf.module.css";
 import { ToastContext } from "../ToastProvider/ToastProvider";
+import { useEscapeKey } from "../../hooks/useEscapeKey";
 
 function ToastShelf() {
   const { toasts, clearAllToasts } = React.useContext(ToastContext);
-
-  React.useEffect(() => {
-    const handleKeyDown = (event) => {
-      if (event.key === "Escape") {
-        clearAllToasts();
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, []);
+  useEscapeKey(clearAllToasts);
 
   return (
     <ol

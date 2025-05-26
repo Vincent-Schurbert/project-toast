@@ -1,38 +1,53 @@
 import React from "react";
 
 import Button from "../Button";
-import Toast from "../Toast/Toast";
-
 import styles from "./ToastPlayground.module.css";
 
 import { VARIANT_OPTIONS } from "../../constants";
 import RadioButton from "../RadioButton/RadioButton";
 import Textarea from "../Textarea/Textarea";
+import ToastShelf from "../ToastShelf/ToastShelf";
 
 function ToastPlayground() {
   const [selectedVariant, setSelectedVariant] = React.useState(
     VARIANT_OPTIONS[0]
   );
 
-  const [message, setMessage] = React.useState("");
+  const [toasts, setToasts] = React.useState([]);
 
-  const [showToast, setShowToast] = React.useState(false);
+  const [message, setMessage] = React.useState("");
 
   function handleVariantChange(event) {
     setSelectedVariant(event.target.value);
   }
 
   function handleMessageChange(event) {
-    console.log(event.target.value);
     setMessage(event.target.value);
   }
 
-  function handleButtonClick() {
-    setShowToast(true);
+  function handleSubmitToast(event) {
+    event.preventDefault();
+
+    if (message.trim() === "") {
+      alert("Please enter a message for the toast.");
+      return;
+    }
+
+    const newToast = {
+      id: crypto.randomUUID(),
+      variant: selectedVariant,
+      message: message,
+    };
+
+    setToasts((prevToasts) => [...prevToasts, newToast]);
+    setMessage("");
+    setSelectedVariant(VARIANT_OPTIONS[0]);
+    console.log("Toast added:", toasts);
   }
 
-  function handleCloseToast() {
-    setShowToast(false);
+  function handleDeleteToast(id) {
+    console.log(id);
+    setToasts((prevToasts) => prevToasts.filter((toast) => toast.id !== id));
   }
 
   return (
@@ -41,41 +56,37 @@ function ToastPlayground() {
         <img alt="Cute toast mascot" src="/toast.png" />
         <h1>Toast Playground</h1>
       </header>
-      {showToast && (
-        <Toast
-          variant={selectedVariant}
-          message={message}
-          dismissToast={handleCloseToast}
-        />
-      )}
+      <ToastShelf toasts={toasts} handleDeleteToast={handleDeleteToast} />
       <div className={styles.controlsWrapper}>
-        <div className={styles.row}>
-          <Textarea value={message} onChange={handleMessageChange} />
-        </div>
-
-        <div className={styles.row}>
-          <div className={styles.label}>Variant</div>
-          <div className={`${styles.inputWrapper} ${styles.radioWrapper}`}>
-            {VARIANT_OPTIONS.map((variant, index) => (
-              <RadioButton
-                key={index}
-                id={variant}
-                name={"variant"}
-                isChecked={variant === selectedVariant}
-                label={variant}
-                onChange={handleVariantChange}
-                value={variant}
-              />
-            ))}
+        <form onSubmit={handleSubmitToast}>
+          <div className={styles.row}>
+            <Textarea value={message} onChange={handleMessageChange} />
           </div>
-        </div>
 
-        <div className={styles.row}>
-          <div className={styles.label} />
-          <div className={`${styles.inputWrapper} ${styles.radioWrapper}`}>
-            <Button onClick={handleButtonClick}>Pop Toast!</Button>
+          <div className={styles.row}>
+            <div className={styles.label}>Variant</div>
+            <div className={`${styles.inputWrapper} ${styles.radioWrapper}`}>
+              {VARIANT_OPTIONS.map((variant, index) => (
+                <RadioButton
+                  key={index}
+                  id={variant}
+                  name={"variant"}
+                  isChecked={variant === selectedVariant}
+                  label={variant}
+                  onChange={handleVariantChange}
+                  value={variant}
+                />
+              ))}
+            </div>
           </div>
-        </div>
+
+          <div className={styles.row}>
+            <div className={styles.label} />
+            <div className={`${styles.inputWrapper} ${styles.radioWrapper}`}>
+              <Button>Pop Toast!</Button>
+            </div>
+          </div>
+        </form>
       </div>
     </div>
   );

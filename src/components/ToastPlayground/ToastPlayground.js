@@ -7,13 +7,14 @@ import { VARIANT_OPTIONS } from "../../constants";
 import RadioButton from "../RadioButton/RadioButton";
 import Textarea from "../Textarea/Textarea";
 import ToastShelf from "../ToastShelf/ToastShelf";
+import { ToastContext } from "../ToastProvider/ToastProvider";
 
 function ToastPlayground() {
   const [selectedVariant, setSelectedVariant] = React.useState(
     VARIANT_OPTIONS[0]
   );
 
-  const [toasts, setToasts] = React.useState([]);
+  const { addToast } = React.useContext(ToastContext);
 
   const [message, setMessage] = React.useState("");
 
@@ -28,26 +29,12 @@ function ToastPlayground() {
   function handleSubmitToast(event) {
     event.preventDefault();
 
-    if (message.trim() === "") {
-      alert("Please enter a message for the toast.");
-      return;
+    const success = addToast(message, selectedVariant);
+
+    if (success) {
+      setMessage("");
+      setSelectedVariant(VARIANT_OPTIONS[0]);
     }
-
-    const newToast = {
-      id: crypto.randomUUID(),
-      variant: selectedVariant,
-      message: message,
-    };
-
-    setToasts((prevToasts) => [...prevToasts, newToast]);
-    setMessage("");
-    setSelectedVariant(VARIANT_OPTIONS[0]);
-    console.log("Toast added:", toasts);
-  }
-
-  function handleDeleteToast(id) {
-    console.log(id);
-    setToasts((prevToasts) => prevToasts.filter((toast) => toast.id !== id));
   }
 
   return (
@@ -56,7 +43,7 @@ function ToastPlayground() {
         <img alt="Cute toast mascot" src="/toast.png" />
         <h1>Toast Playground</h1>
       </header>
-      <ToastShelf toasts={toasts} handleDeleteToast={handleDeleteToast} />
+      <ToastShelf />
       <div className={styles.controlsWrapper}>
         <form onSubmit={handleSubmitToast}>
           <div className={styles.row}>
